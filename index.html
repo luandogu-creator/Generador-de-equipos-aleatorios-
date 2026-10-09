@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Equipos - Múltiples Grupos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.8); }
+        }
+        .glow-card {
+            animation: pulse-glow 3s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-slate-100 min-h-full flex flex-col">
+
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-indigo-500/25 sticky top-0 z-50 px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-indigo-500/40 text-white text-xl">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">
+                        Sorteo Mágico Escolar
+                    </h1>
+                    <p id="header-school-sub" class="text-xs text-slate-400">Escuela Secundaria Técnica Núm. 21 • Grupo 3-A</p>
+                </div>
+            </div>
+            <div class="flex items-center flex-wrap gap-2">
+                <!-- Group Selector Menu -->
+                <div class="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-xl shadow">
+                    <i class="fa-solid fa-school text-indigo-400 text-xs"></i>
+                    <select id="group-select" onchange="switchGroup(this.value)" class="bg-transparent text-xs font-semibold text-slate-200 focus:outline-none cursor-pointer">
+                        <!-- TERCEROS -->
+                        <optgroup label="Tercer Grado" class="bg-slate-900 text-indigo-300">
+                            <option value="3A" class="bg-slate-900 text-slate-100">Grupo 3-A</option>
+                            <option value="3B" class="bg-slate-900 text-slate-100">Grupo 3-B</option>
+                            <option value="3C" class="bg-slate-900 text-slate-100">Grupo 3-C</option>
+                            <option value="3D" class="bg-slate-900 text-slate-100">Grupo 3-D</option>
+                            <option value="3E" class="bg-slate-900 text-slate-100">Grupo 3-E</option>
+                        </optgroup>
+                        <!-- SEGUNDOS -->
+                        <optgroup label="Segundo Grado" class="bg-slate-900 text-indigo-300">
+                            <option value="2A" class="bg-slate-900 text-slate-100">Grupo 2-A (Sec. Técnica 21)</option>
+                            <option value="2B" class="bg-slate-900 text-slate-100">Grupo 2-B (Sec. Técnica 21)</option>
+                            <option value="2C" class="bg-slate-900 text-slate-100">Grupo 2-C (Sec. Técnica 21)</option>
+                            <option value="2G" class="bg-slate-900 text-slate-100">Grupo 2-G (Sec. Técnica 21)</option>
+                        </optgroup>
+                        <!-- PRIMEROS -->
+                        <optgroup label="Primer Grado" class="bg-slate-900 text-indigo-300">
+                            <option value="1I" class="bg-slate-900 text-slate-100">Grupo 1-I (Gilberto Pacheco)</option>
+                            <option value="1J" class="bg-slate-900 text-slate-100">Grupo 1-J (Gilberto Pacheco)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs px-3 py-1.5 rounded-full font-medium">
+                    <i class="fa-solid fa-user-graduate mr-1"></i> <span id="total-count">30</span> Alumnos
+                </span>
+                <button onclick="openStudentModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-pen-to-square text-indigo-400"></i> Alumnos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Controls Sidebar -->
+        <div class="lg:col-span-1 bg-slate-900/60 backdrop-blur border border-indigo-500/20 rounded-3xl p-5 shadow-xl flex flex-col gap-5 h-fit">
+            <h2 class="text-base font-bold text-indigo-300 flex items-center gap-2 border-b border-indigo-500/20 pb-3">
+                <i class="fa-solid fa-sliders"></i> Panel de Configuración
+            </h2>
+
+            <!-- Mode Selector -->
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-medium text-slate-300">Modo de División:</label>
+                <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
+                    <button id="btn-mode-teams" onclick="setMode('teams')" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition">
+                        Por Equipos
+                    </button>
+                    <button id="btn-mode-size" onclick="setMode('size')" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">
+                        Por Integrantes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Input Slider -->
+            <div class="flex flex-col gap-2 bg-indigo-950/30 p-4 rounded-2xl border border-indigo-500/20">
+                <div class="flex justify-between items-center">
+                    <label id="param-label" class="text-xs font-medium text-indigo-200">Cantidad de Equipos:</label>
+                    <span id="param-value" class="text-lg font-bold text-pink-400 bg-pink-500/10 px-2.5 py-0.5 rounded-lg border border-pink-500/20">6</span>
+                </div>
+                <input type="range" id="param-slider" min="2" max="15" value="6" oninput="updateParamValue(this.value)" class="w-full accent-indigo-500 cursor-pointer">
+                <div class="flex justify-between text-[10px] text-slate-400">
+                    <span id="min-label">2 equipos</span>
+                    <span id="max-label">15 equipos</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-2.5 mt-2">
+                <button onclick="generateTeams()" class="w-full bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:opacity-95 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-indigo-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i> ¡Generar Equipos!
+                </button>
+                <button onclick="resetAssignments()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 px-4 rounded-xl border border-slate-700 transition text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Reiniciar Sorteo
+                </button>
+            </div>
+
+            <!-- Export / Print -->
+            <div class="pt-2 border-t border-indigo-500/20 flex gap-2">
+                <button onclick="exportResult()" class="flex-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Copiar
+                </button>
+                <button onclick="window.print()" class="flex-1 bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Imprimir
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Display Area -->
+        <div class="lg:col-span-3 flex flex-col gap-4">
+            
+            <!-- Quick Stats Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-900/60 backdrop-blur border border-indigo-500/20 p-3.5 rounded-2xl shadow-md flex items-center gap-3">
+                    <div class="bg-purple-500/20 text-purple-400 p-2.5 rounded-xl">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Total Equipos</p>
+                        <p id="stat-teams-count" class="text-base font-bold text-white">0</p>
+                    </div>
+                </div>
+                <div class="bg-slate-900/60 backdrop-blur border border-indigo-500/20 p-3.5 rounded-2xl shadow-md flex items-center gap-3">
+                    <div class="bg-sky-500/20 text-sky-400 p-2.5 rounded-xl">
+                        <i class="fa-solid fa-user-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Promedio x Equipo</p>
+                        <p id="stat-avg-size" class="text-base font-bold text-white">0</p>
+                    </div>
+                </div>
+                <div class="col-span-2 sm:col-span-1 bg-slate-900/60 backdrop-blur border border-indigo-500/20 p-3.5 rounded-2xl shadow-md flex items-center gap-3">
+                    <div class="bg-pink-500/20 text-pink-400 p-2.5 rounded-xl">
+                        <i class="fa-solid fa-dice"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400">Estado del Sorteo</p>
+                        <p id="stat-status" class="text-xs font-bold text-amber-400 mt-0.5">Pendiente de girar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Grid Container -->
+            <div id="teams-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 min-h-[400px]">
+                <!-- Placeholder / Initial state -->
+                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-slate-900/40 border-2 border-dashed border-indigo-500/20 rounded-3xl text-center">
+                    <div class="w-20 h-20 bg-indigo-500/10 text-indigo-400 rounded-3xl flex items-center justify-center text-3xl mb-4 animate-float border border-indigo-500/20 shadow-inner">
+                        <i class="fa-solid fa-people-group"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-indigo-200">¡Listos para formar equipos!</h3>
+                    <p class="text-sm text-slate-400 max-w-md mt-1">Selecciona tu grupo en la parte superior y haz clic en <span class="text-indigo-300 font-semibold">"¡Generar Equipos!"</span>.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="student-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl max-w-xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center pb-4 border-b border-indigo-500/20">
+                <h3 id="modal-title" class="text-lg font-bold text-indigo-200 flex items-center gap-2">
+                    <i class="fa-solid fa-users-line text-indigo-400"></i> Lista de Alumnos
+                </h3>
+                <button onclick="closeStudentModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-400 my-3">Puedes editar, agregar o eliminar alumnos según la asistencia del día de hoy:</p>
+            
+            <div class="flex gap-2 mb-3">
+                <input type="text" id="new-student-input" placeholder="Nombre completo del alumno..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <button onclick="addStudent()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Añadir
+                </button>
+            </div>
+
+            <div id="students-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[350px]">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="pt-4 border-t border-indigo-500/20 flex justify-between items-center mt-3">
+                <button onclick="restoreDefaultStudents()" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium">
+                    Restaurar lista original
+                </button>
+                <button onclick="closeStudentModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow">
+                    Guardar y Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 border border-indigo-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+        <div id="toast-icon" class="text-emerald-400 text-lg"><i class="fa-solid fa-circle-check"></i></div>
+        <div id="toast-message" class="text-xs font-medium">¡Equipos generados con éxito!</div>
+    </div>
+
+    <script>
+        // Datasets for all groups (3-A to 3-E, 2-B, 2-A, 1-J, 1-I)
+        const groupsData = {
+            "3A": {
+                name: "Grupo 3-A",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ACOSTA NAVARRO ANGIE MICHELLE",
+"BARBOZA LOPEZ KEYLI YORLET",
+"CAMPOVERDE GUERRERO JESUS ALEJANDRO",
+"CANO PIA DYLAN OMAR",
+"CARRIZALES RUIZ MARIAJOSE",
+"CHAPARRO ALVAREZ MAILY",
+"ESCALANTE YOCUPICIO RUTH FERNANDA",
+"GALINDO RODRIGUEZ JULIO CESAR",
+"GARCIA VAZQUEZ DARA ELIZAMA",
+"GONZALEZ CHAVEZ JUAN DIEGO",
+"GUTIERREZ LOPEZ GUSTAVO ALBERTO",
+"HERNANDEZ PEREZ SHERLYN KETZHALY",
+"LANDEROS GUTIERREZ MAIYAH ALEJANDRA",
+"LOPEZ OLIVAS ALONDRA REBECA",
+"LUNA ZAZUETA KARIME YOSELIN",
+"MARISCAL CABRERA MARTIN HUMBERTO TADEO",
+"MEDINA RODRIGUEZ ERICK MATEO",
+"NEVAREZ GOMEZ YARELI JOSEALI",
+"OSORIO CORRALES MELANIE FERNANDA",
+"OTAEZ CASTRO EVELYN CAMILA",
+"PARRA CERVANTES MARIA XIMENA",
+"RUIZ TORRES YURIEL ARISAI",
+"SANTIZO VALENZUELA ANGELA BERENICE",
+"TALAVERA RIZO ESMERALDA GUADALUPE",
+"TAPIA NERI IVANNA NOEMI",
+"VILLANUEVA LUNA AISLIN NAYELI",
+"VIVEROS RANGEL DIANA ILEEN"
+                ]
+            },
+            "3B": {
+                name: "Grupo 3-B",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"AMPARAN RANGEL DANNA GUADALUPE",
+"AVILA LIERA DAMARIS AIDEE",
+"BERNAL BARRERAS BLANCA JAZMIN",
+"CARRASCO SANCHEZ ELISA MADAY",
+"ESCALIER DELGADO ROMEL SEBASTIAN",
+"ESTRADA MORENO ALLISON YOVANNA",
+"FUENTES MURRIETA DANNA JOCELYN",
+"FUENTES MURRIETA JOSE LUIS",
+"GALLEGOS AVILA CARLOS EMMANUEL",
+"GARCIA FLORES AMELIA GUADALUPE",
+"GIRON SUAREZ BRAYAN FRANCISCO",
+"GONZALEZ GARCIA KIARA YOLETH",
+"HERNANDEZ FLORES MARIA DEL ROSARIO",
+"HERRERA ANAYA DANIELA",
+"LEAL URIAS BRANDON ROBERTO",
+"MANCILLAS LUGO BRICIA ESTHEFANIA",
+"MERINO GONZALEZ DEVORA VICTORIA",
+"MEZA ARENAS KELLY CAMILA",
+"MINJAREZ GARCIA CAMILA MONSERRAT",
+"MONROY MENDOZA ANGEL ALBERTO",
+"OLMEDO MURRIETA AMAIRANY GRETTELL",
+"ORTEGA GAMEZ ELIAN OSVALDO",
+"PEREZ AUDELO CLAUDIO SUREM",
+"PEREZ JUAREZ JOEL LORENZO",
+"PEREZ MORALES EVELYN NAYELI",
+"REYES PEREZ AISLINN GUADALUPE",
+"ROBLES MENDIVIL FHERNANDA NAYELI",
+"RODRIGUEZ PEREZ FRANCISCO JAVIER",
+"TEZOCO GUTIERREZ LASHMI LIZETH",
+"VERDUGO MUÑIZ LINDA SUJEY"
+                ]
+            },
+            "3C": {
+                name: "Grupo 3-C",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ALVARADO GARCIA YULIANA",
+"ARMENTA AVILEZ ISABELA ROSA DE FRANCISCO",
+"BARNETT DE LA TORRE ABRAHAM",
+"CASTRO DUARTE BITIA ABIGAIL",
+"FLORES FLORES ESTEFANIA",
+"GALAN ORTIZ CRISTIAN",
+"GONZALEZ IBARRA GERARDO GADIEL",
+"HERNANDEZ VARGAS LIAH NICOLE GUADALUPE",
+"HERRERA ZAMORA MARIANA",
+"JARAMILLO HERRERA ALYSSON CRYSTAL",
+"JIMENEZ CASTELLANOS ROSARIO SARAHI",
+"LARA MOJARRO ALAN ALEXIS",
+"MECINAS ARELLANO FRANCISCO MIGUEL",
+"MELCHOR RAMIREZ LUIS ANGEL",
+"NEVAREZ ZARAGOZA KRYSTHA VERALY",
+"ORTEGA GAMEZ MOISES ABRAHAM",
+"ORTIZ GUERRERO JUAN ENRIQUE",
+"PADUA CONTRERAS YOSELINE SOFIA",
+"PALOMO CURIEL ANGELICA GUADALUPE",
+"PAREDES MEZA REY AXEL",
+"RENDON CUADRAS AMBAR NOHELIA",
+"REYES CUELLAR ANGELINA",
+"RICO HERMOSILLO LESLY CAMILA",
+"RIOS BOJORQUEZ GUSTAVO ALONSO",
+"RIVERA OCHOA KAROLINA GERALDINE",
+"ROJO CERRATO LUIS FERNANDO",
+"SALAZAR CONTRERAS VIOLETTA",
+"SANTIBAÑEZ MIRANDA XIMENA",
+"VENTURA RIOS DANNA SOFIA",
+"ZAVALA NAVARRO BRISSA ARAHIT"
+                ]
+            },
+            "3D": {
+                name: "Grupo 3-D",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ALARCON MONDACA EMMA YUTZU",
+"AVILA CAMARGO ABEL HUMBERTO",
+"CEDEÑO PAREDES TAMARA",
+"DELGADO GUILLERMO ANDRES",
+"FELIX PEÑUELAS ALAN GAEL",
+"GARCIA RUIZ SUSANA JOSELIN",
+"GOMEZ MARTINEZ LUISA XIMENA",
+"GOVEA PALOMA",
+"GUZMAN CANCIO ANDREA",
+"HERNANDEZ GAXIOLA BIANCA YAKELINE",
+"LEZAMA ROBLES ANGEL MARTIN",
+"LUNA HERNANDEZ GENESIS BETHZABE",
+"LUNA PEÑA ANGEL EDUARDO",
+"MARTINEZ BELTRAN ANGELIQUE IRENE",
+"MARTINEZ ISAURO DAIRA ZOE",
+"MELCHOR VARGAS GABRIELA",
+"MOLINA MONTIJO DAVID ISAI",
+"NAVARRO BALDERAS CINTHYA",
+"QUEVEDO ALVAREZ EVELYN PAOLA",
+"RAMIREZ RODRIGUEZ JESUS ARMANDO",
+"RODRIGUEZ BASILIO JAZMIN",
+"RUELAS FLORES JESUS MANUEL",
+"SOTO IBARRA JESUS ALEXANDER",
+"TAPIA LOPEZ JULIA STEPHANIA",
+"VAZQUEZ CAMPOS JESUS ARTURO",
+"VIEYRA LEZAMA DANNA PAOLA",
+"VIEYRA RANGEL KHIARA MARINA",
+"VILLICAÑA PEDROZA YOANA DANIELA"
+                ]
+            },
+            "3E": {
+                name: "Grupo 3-E",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ADAME LEYVA ASHLEY LIZETH",
+"ALTAMIRANO LOPEZ LUZ ELENA",
+"ANTELO RODRIGUEZ JESUS EDUARDO",
+"ARREOLA HERNANDEZ NICOLE AYLIN",
+"CAMACHO HERNANDEZ JADEK BERENICE",
+"CANEDO MIRANDA LUIS MARIO",
+"CARRILLO SAENZ ROSA YAMILETH",
+"CEBALLOS INZUNZA DANIEL ALONSO",
+"CONTRERAS BRINGAS EDWIN MANUEL",
+"DIAZ PERALTA MARIA GUADALUPE",
+"FRIAS TADEO BRITNY QUETZALY",
+"HERNANDEZ MURILLO EDWIN FAVIAN",
+"IBARRA VALENZUELA YEIMY ALONDRA",
+"MARTINEZ SANCHEZ SANTIAGO",
+"MARTINEZ TAPIA MARIANA",
+"MARTINEZ VILLALBA JONATHAN ALEXIS",
+"MAYCOMEA ROSAS MELANI",
+"NAVARRETE TORRES CARLOS ADRIAN",
+"OCHOA GUZMAN SAUL ANTONIO",
+"PACHECO LOPEZ KAREN LUDYM",
+"PADUA MESA JONATHAN",
+"QUINTANA BARAJAS CINTHYA MAIDEN",
+"RIOS LEYVA CESIA SAMAI",
+"RODRIGUEZ YESCAS RAMON ENRIQUE",
+"RUIZ VALDEZ CARLOS MIGUEL",
+"SALAZAR CURIEL OSCAR JOHAN",
+"SOTO ZEPEDA MAITE SARAI",
+"URIAS RODRIGUEZ BLANCA MELISSA",
+"ZENDEJAS ACEVEDO HECTOR DANIEL"
+                ]
+            },
+            "2A": {
+                name: "Grupo 2-A",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ANGEL TORRES YEIMI NICOLE",
+"AYALA GUTIERREZ JOSE ANTONIO",
+"BOLAÑOS MENDOZA EYSA KARIELA",
+"BRAVO GOMEZ ANDREA DAYANARA",
+"CARRILLO HERNANDEZ SEBASTIAN ANUAR",
+"CASTILLO AVILA MOISES RODOLFO",
+"CHABLE BONFIL OMAR ENRIQUE",
+"CISNEROS ZAMORA RICARDO GAEL",
+"CRUZ PORTELAS ALLIZON RENNE",
+"CRUZ PORTELAS KENNETH MIGUEL",
+"CUEVAS RIVERA KENDRA GUADALUPE",
+"ESPINOZA ROJAS VALENTE ALEJANDRO",
+"FLORES MARÑEZ PERLA ITZEL",
+"GARCIA GONZALEZ MEREDITH MARLETH",
+"GARCIA GUTIERREZ LUNA CAROLINA",
+"GONZALEZ CUELLAR DULCE ESMERALDA",
+"HERNANDEZ MERCADO EDWIN JARED",
+"HERNANDEZ VALENZUELA LUZMAR RUBY",
+"JIMENEZ RAMOS BENJAMIN",
+"LEON ZAVALA AUSTIN YAHEL",
+"MONTERROSAS HERNANDEZ MARIA FERNANDA",
+"OROPEZA PALOMARES DIEGO ABRAHAM",
+"ORTIZ HERNANDEZ ANGEL YOAN",
+"PARRA PONCE JUAN JOSE",
+"PASOS MONGE SANDRA LUZ",
+"PORTILLO ARIAS AIRAM JULIAN",
+"PORTILLO ARIAS NADIA JULIETA",
+"QUIJADA SANTANA ANA YSLED",
+"VAZQUEZ VAZQUEZ JOHNNY EMANUEL"
+                ]
+            },
+            "2B": {
+                name: "Grupo 2-B",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+                    "ARCE HERNANDEZ DANIEL JOSUE",
+                    "BENITEZ GALINDO JORGE ROBERTO",
+                    "BRACAMONTE NUÑEZ MARIA GUADALUPE",
+                    "BUELNA LOPEZ CARLOS MARTIN",
+                    "CABRERA CANEZ DENIS LUCIANA",
+                    "CALVILLO GRADO EVA LUNA",
+                    "CAMARGO SANCHEZ BRANDON ALBERTO",
+                    "CARRILLO DE LA CRUZ FERNANDA VICTORIA",
+                    "DIAZ CALDERON JESUS MIGUEL",
+                    "DIAZ CALDERON JOSE MIGUEL",
+                    "DUARTE RUELAS GENESIS ADRIANA",
+                    "FERNANDEZ ACUNA JOHAN ALEPH",
+                    "FIGUEROA SOTO ODALYZ GUADALUPE",
+                    "GAMEZ GUZMAN VALERIA ISABEL",
+                    "GAONA DELGADO ESTEFANY MICHELL",
+                    "GARCIA RUIZ LORENZO ISMAEL JOSSUE",
+                    "GARIBAY AGUIRRE MIGUEL ALBERTO",
+                    "GARIBAY DE LA TORRE KARELY YORCHET",
+                    "GOMEZ MARTINEZ PEDRO",
+                    "HERNANDEZ AGUIRRE CARLOS ANTONIO",
+                    "HERNANDEZ DE LA CRUZ AMISADAI",
+                    "HIGUERA LOPEZ NOE ALEXANDER",
+                    "JUAREZ ROBLES LIAH MONSERRAT",
+                    "LORETO CUENCA MELANIE VALERIA",
+                    "MORALES CORZO WILBER ENRIQUE",
+                    "PEREZ PEREZ ABRAHAM ELISEO",
+                    "RIVERA VEGA ALEXIA SOMARA",
+                    "RODRIGUEZ AGUIRRE DAYANNA",
+                    "SANTIAGO CONTRERAS SOLITZEL",
+                    "TORRES ACUÑA MELANNY NOHEMY"
+                ]
+            },
+            "2C": {
+                name: "Grupo 2-C",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ALARCON MONDACA ANGELICA MIYOSHI",
+"ALVAREZ ORNELAS MAGDIEL EDUARDO",
+"BELLO CERDA YAHIRA EDITH",
+"BIMVELA DAMIAN JOELY NAYELI",
+"CELAYA MORAN ANGEL DANIEL",
+"CELEDON TORRES ARMIDA DE JESUS",
+"CHI MAYTORENA DANIELA RACHELLE",
+"GALDAMEZ MORALES DEYVI ALEXIS",
+"GALINDO RODRIGUEZ KIMBERLY NATHALI",
+"GALLARDO AGUIAR ERIKA NICKOL",
+"GARCIA PALOMERA PABLO",
+"HAROS MORENO CAMILA YOSSELINE",
+"HIGUERA DOMINGUEZ VICTOR EVERARDO",
+"JUAREZ LOPEZ KRISTEL",
+"LARA URRUTIA TERESA",
+"MACIAS MORENO BRITANNY GUADALUPE",
+"MARTINEZ MONTIJO GENESIS VALENTINA",
+"MENDIAS CRISPIN FRANCISCO AGUSTIN",
+"NEVAREZ GOMEZ GRECIA LIZBETH",
+"NIEBLAS HERRERA DAVID ESPIRIDION",
+"PACHECO CAMACHO LIAM DANIEL",
+"PEREZ CARRILLO YULIANA",
+"PLASCENCIA CALDERON JOSSELIN JESUS",
+"QUIJADA FLORES MARIA TERESA",
+"RIOS BOJORQUEZ JOSHUA ALEJANDRO",
+"SALAZAR LOPEZ ARIADNE SOFIA",
+"VALDEZ LEON ALISSON VIANEY",
+"ZENTENO OLAN GABRIEL"
+                ]
+            },
+            "2G": {
+                name: "Grupo 2-G",
+                school: "Escuela Secundaria Técnica Núm. 21",
+                students: [
+"ALDACO LOPEZ DAYANA FERNANDA",
+"ALVAREZ CUEN MIA FERNANDA",
+"ARROYO RUBIO YULL SAMMAEL",
+"ARZOLA BARRIOS FAUSTO GAEL",
+"CABELLOS ACUNA BETZAYDA ESCARLETH",
+"CAMPOS ZAMUDIO GADIER OSVALDO",
+"CONS MARIN BIANCA JULISSA",
+"CRUZ CRUZ MEGAN KIMBERLY",
+"ENCISO RUIZ ALEXA VALENTINA",
+"FLORES LOPEZ ALEJANDRO",
+"GARCIA CALZADILLAS SARAHI MAYTE",
+"GARCIA MERAZ KATYA MAYRIN",
+"GONZALEZ CASTRO MALEE ANAI",
+"GONZALEZ RODRIGUEZ JESUS JAEL",
+"HERNANDEZ PADUA ANA MARIA",
+"HERRERA CORRAL REYNA NAYELLI",
+"JAIME FIGUEROA ADRIAN EDUARDO",
+"LIZARRAGA SANTANA GUILLERMO ANDRES",
+"MENDEZ CABELLOS ANA MARGARITA",
+"MORAN VALENCIA GRECIA AZENETH",
+"MUNIZ LOPEZ REINA PAOLA",
+"NIEBLA FUENTES ROSA GUADALUPE",
+"ORDUNO ECHAVE GABRIEL EMILIANO",
+"PEREZ GONZALEZ ESMERALDA GUADALUPE",
+"PINEDA CELAYA DAYANA BRIZIA",
+"RODRIGUEZ GONZALEZ MARTIN NICOLAS",
+"RODRIGUEZ MARTINEZ DYLAN MANUEL",
+"SALVADOR NAZARIO JAKELINE GUADALUPE",
+"SANCHEZ GARCIA ALEXANDER MANUEL",
+"SANTOS OLIVAS RAMON RODRIGO",
+"TREJO GARCIA ANGEL DANIEL",
+"VALENCIA DIAZ AMAIRANY GUADALUPE"
+                ]
+            },
+            "1J": {
+                name: "Grupo 1-J",
+                school: "Escuela Prof. Gilberto Pacheco Castillo",
+                students: [
+                    "ALVAREZ SANCHEZ OSCAR MARTIN",
+                    "AQUINO PALAZUELOS EDGARDO JAMEEL",
+                    "ARREDONDO LEON BRANDON ISAI",
+                    "ASTORGA FELIX MANUEL ALLISON",
+                    "CAMARENA DE SANTIAGO YURIDIA ELIZABETH",
+                    "CASTILLO FLORES ANGEL ALEXANDER",
+                    "CELAYA LOPEZ ALBERTO RAFAEL",
+                    "CLARCK PALACIOS JOHAN ALEXIS",
+                    "CORTINA BARRERA LUIS ENRIQUE",
+                    "DANIEL AMAYA DANNA AKEMY",
+                    "DIAZ FELIX KENDRA MARCELA",
+                    "FIERRO MURILLO KIMBERLY YOSELIN",
+                    "GALLEGOS RAMIREZ MATEO ALBERTO",
+                    "GARCIA BURGUENO JESUS IVAN",
+                    "HERNANDEZ MARTINEZ VALENTINO",
+                    "IRIBE DELGADO GALILEA SALAI",
+                    "LEON CELAYA DEREK SAMUEL",
+                    "LIMON ESPINOZA EMILY JIMENA",
+                    "MARQUEZ ELENES JADE NAHIDY",
+                    "MARTINEZ VINALAY IRVING JOSE",
+                    "MATA PERALES ABEL NATHANAEL",
+                    "MERCED MERCADO LUZ ALONDRA",
+                    "MOLINA TOPETE ZAIRA NIRELLE",
+                    "MORA MENA DORYAN GERARDO",
+                    "MUNOZ ACOSTA MELISA",
+                    "PEREZ MORADO FELIX JAVIER",
+                    "RAMIREZ AGUILAR IKER DARIEL",
+                    "RODRIGUEZ NIEBLAS PERLA ZOE",
+                    "ROMERO CALVILLO LEONEL KENNETH",
+                    "SAENZ MALDONADO ANDREA DENISSE",
+                    "SALAS NAVA CARLOS ALEXIS",
+                    "SANCHEZ FELIX JESUS SEBASTIAN",
+                    "SILLAS CASILLAS ADRIANA NICOLE",
+                    "VERGARA OLMEDO ALEXA AYTANA",
+                    "VILLEGAS CISNEROS ADRIEL ADONAI"
+                ]
+            },
+            "1I": {
+                name: "Grupo 1-I",
+                school: "Escuela Prof. Gilberto Pacheco Castillo",
+                students: [
+                    "APODACA LEON MICHAEL SEBASTIAN",
+                    "ASCENCION PADILLA LUIS FERNANDO",
+                    "BARRAGAN FLORES MERIDA",
+                    "BORBOA MENDOZA REGINA",
+                    "CEBALLOS VILLA NAYDELIN ALEXIA",
+                    "CHI ESPINOZA JOSIO ANTONIO",
+                    "DE LA VARA VALDEZ ALY NATASHA",
+                    "ESPINOZA ROMERO ROXANA AIDELYN",
+                    "FIGUEROA BADILLA SEBASTIAN ADALBERTO",
+                    "GARCIA ARIZA MIGUEL ALFONSO",
+                    "GURROLA LOPEZ KEVIN URIEL",
+                    "HOLGUIN APODACA JOSEPH",
+                    "IBARRA VALENZUELA VIVIANA MICHEL",
+                    "JAIME LARA BRENDA ISELA",
+                    "LAMAS VINGOCHEA AIRAM ALONSO",
+                    "LEZAMA NICOLAS THELMA ROSSALY",
+                    "MARTINEZ CHAVEZ SERGIO FRANCISCO",
+                    "MARTINEZ ROJAS WILBER ELIAS",
+                    "MENDOZA MARTINEZ JESUS MANUEL",
+                    "MENDOZA VALDEZ ABRAHAM NEIJAH",
+                    "MORENO GUZMAN VICTOR AARON",
+                    "MUNIZ AVILES JESUS AURELIO",
+                    "RAMALES VALENZUELA ALLISON VALERIA",
+                    "RAMOS GUTIERREZ JOSE ANGEL",
+                    "REGALADO LOPEZ VALERIA ISABEL",
+                    "ROBLES BERRELLEZA BRIANDA YESLIN",
+                    "RODRIGUEZ VALENZUELA ANGEL JADIEL",
+                    "RUBIO CONTRERAS GLORIA ESTEFANIA",
+                    "SALGADO TALLA ADRIANA NOHEMI",
+                    "SOTO GONZALEZ ANDREA JAQUELIN",
+                    "VALDEZ MIRANDA AMISADAY AINI",
+                    "VERA PEREZ DIANA PAOLA",
+                    "ZAZUETA REYES AISSLIN ALEXIA"
+                ]
+            }
+        };
+
+        let currentGroupKey = '3A';
+        let originalStudents = [...groupsData['3A'].students];
+        let students = [...originalStudents];
+        let currentMode = 'teams'; // 'teams' or 'size'
+        let paramValue = 6;
+
+        // Team custom themes
+        const teamThemes = [
+            { bg: 'from-blue-600/20 to-indigo-900/30', border: 'border-blue-500/40', badge: 'bg-blue-500 text-white', icon: 'fa-shield-halved', titleColor: 'text-blue-300' },
+            { bg: 'from-purple-600/25 to-pink-900/30', border: 'border-purple-500/40', badge: 'bg-purple-500 text-white', icon: 'fa-dragon', titleColor: 'text-purple-300' },
+            { bg: 'from-emerald-600/20 to-teal-900/30', border: 'border-emerald-500/40', badge: 'bg-emerald-500 text-white', icon: 'fa-leaf', titleColor: 'text-emerald-300' },
+            { bg: 'from-amber-600/20 to-orange-900/30', border: 'border-amber-500/40', badge: 'bg-amber-500 text-white', icon: 'fa-fire', titleColor: 'text-amber-300' },
+            { bg: 'from-rose-600/20 to-red-900/30', border: 'border-rose-500/40', badge: 'bg-rose-500 text-white', icon: 'fa-heart', titleColor: 'text-rose-300' },
+            { bg: 'from-cyan-600/20 to-sky-900/30', border: 'border-cyan-500/40', badge: 'bg-cyan-500 text-white', icon: 'fa-bolt', titleColor: 'text-cyan-300' },
+            { bg: 'from-fuchsia-600/20 to-purple-900/30', border: 'border-fuchsia-500/40', badge: 'bg-fuchsia-500 text-white', icon: 'fa-star', titleColor: 'text-fuchsia-300' },
+            { bg: 'from-lime-600/20 to-emerald-900/30', border: 'border-lime-500/40', badge: 'bg-lime-600 text-slate-950 font-bold', icon: 'fa-gem', titleColor: 'text-lime-300' },
+            { bg: 'from-indigo-600/20 to-blue-900/30', border: 'border-indigo-500/40', badge: 'bg-indigo-500 text-white', icon: 'fa-rocket', titleColor: 'text-indigo-300' },
+            { bg: 'from-yellow-600/20 to-amber-900/30', border: 'border-yellow-500/40', badge: 'bg-yellow-500 text-slate-950 font-bold', icon: 'fa-crown', titleColor: 'text-yellow-300' },
+            { bg: 'from-teal-600/20 to-slate-900/30', border: 'border-teal-500/40', badge: 'bg-teal-500 text-white', icon: 'fa-compass', titleColor: 'text-teal-300' },
+            { bg: 'from-violet-600/20 to-indigo-900/30', border: 'border-violet-500/40', badge: 'bg-violet-500 text-white', icon: 'fa-meteor', titleColor: 'text-violet-300' },
+            { bg: 'from-pink-600/20 to-rose-900/30', border: 'border-pink-500/40', badge: 'bg-pink-500 text-white', icon: 'fa-feather', titleColor: 'text-pink-300' },
+            { bg: 'from-sky-600/20 to-blue-900/30', border: 'border-sky-500/40', badge: 'bg-sky-500 text-white', icon: 'fa-globe', titleColor: 'text-sky-300' },
+            { bg: 'from-orange-600/20 to-amber-900/30', border: 'border-orange-500/40', badge: 'bg-orange-500 text-white', icon: 'fa-sun', titleColor: 'text-orange-300' }
+        ];
+
+        const teamNamesList = [
+            "Los Alfa", "Los Campeones", "Los Tigres", "Los Centellas", "Los Invencibles",
+            "Los Titanes", "Los Dinamita", "Los Fénix", "Los Rayos", "Los Guardianes",
+            "Los Gigantes", "Los Cóndores", "Los Estelares", "Los Leones", "Los Dragones"
+        ];
+
+        window.onload = function() {
+            switchGroup('3A');
+        };
+
+        function switchGroup(groupKey) {
+            currentGroupKey = groupKey;
+            const gInfo = groupsData[groupKey];
+            originalStudents = [...gInfo.students];
+            students = [...originalStudents];
+            
+            document.getElementById('header-school-sub').innerText = `${gInfo.school} • ${gInfo.name}`;
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-users-line text-indigo-400"></i> Lista de Alumnos (${gInfo.name})`;
+            
+            resetAssignments();
+            updateTotalCount();
+            renderStudentsModalList();
+            showToast(`Cargado ${gInfo.name} (${students.length} alumnos)`, "info");
+        }
+
+        function updateTotalCount() {
+            document.getElementById('total-count').innerText = students.length;
+            const slider = document.getElementById('param-slider');
+            if (currentMode === 'teams') {
+                slider.max = Math.max(2, Math.min(15, students.length));
+                if (parseInt(slider.value) > students.length) slider.value = Math.max(2, students.length);
+            } else {
+                slider.max = Math.max(2, students.length);
+            }
+            updateParamValue(slider.value);
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            const btnTeams = document.getElementById('btn-mode-teams');
+            const btnSize = document.getElementById('btn-mode-size');
+            const paramLabel = document.getElementById('param-label');
+            const slider = document.getElementById('param-slider');
+
+            if (mode === 'teams') {
+                btnTeams.className = "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition";
+                btnSize.className = "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                paramLabel.innerText = "Cantidad de Equipos:";
+                slider.min = 2;
+                slider.max = Math.max(2, Math.min(15, students.length));
+                slider.value = Math.min(6, students.length);
+            } else {
+                btnSize.className = "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow transition";
+                btnTeams.className = "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                paramLabel.innerText = "Alumnos por Equipo:";
+                slider.min = 2;
+                slider.max = Math.max(2, students.length);
+                slider.value = 4;
+            }
+            updateParamValue(slider.value);
+        }
+
+        function updateParamValue(val) {
+            paramValue = parseInt(val);
+            document.getElementById('param-value').innerText = paramValue;
+            if (currentMode === 'teams') {
+                document.getElementById('min-label').innerText = `2 equipos`;
+                document.getElementById('max-label').innerText = `${Math.max(2, Math.min(15, students.length))} equipos`;
+            } else {
+                document.getElementById('min-label').innerText = `2 alumnos/eq`;
+                document.getElementById('max-label').innerText = `${students.length} alumnos/eq`;
+            }
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generateTeams() {
+            if (students.length === 0) {
+                showToast("No hay alumnos en la lista para sortear.", "error");
+                return;
+            }
+
+            let numTeams = 0;
+            let shuffled = shuffleArray(students);
+
+            if (currentMode === 'teams') {
+                numTeams = Math.min(paramValue, shuffled.length);
+            } else {
+                let membersPerTeam = paramValue;
+                numTeams = Math.ceil(shuffled.length / membersPerTeam);
+            }
+
+            let teams = Array.from({ length: numTeams }, () => []);
+            shuffled.forEach((student, index) => {
+                let teamIndex = index % numTeams;
+                teams[teamIndex].push(student);
+            });
+
+            renderTeams(teams);
+            showToast(`¡Se han generado ${numTeams} equipos exitosamente!`, "success");
+        }
+
+        function renderTeams(teams) {
+            const container = document.getElementById('teams-container');
+            container.innerHTML = '';
+
+            document.getElementById('stat-teams-count').innerText = teams.length;
+            let totalMembers = teams.reduce((acc, t) => acc + t.length, 0);
+            let avg = (totalMembers / teams.length).toFixed(1);
+            document.getElementById('stat-avg-size').innerText = avg;
+            document.getElementById('stat-status').innerText = "¡Sorteo Completado!";
+            document.getElementById('stat-status').className = "text-xs font-bold text-emerald-400 mt-0.5";
+
+            const gInfo = groupsData[currentGroupKey];
+
+            teams.forEach((teamMembers, idx) => {
+                let theme = teamThemes[idx % teamThemes.length];
+                let teamName = teamNamesList[idx % teamNamesList.length];
+
+                let card = document.createElement('div');
+                card.className = `bg-gradient-to-br ${theme.bg} backdrop-blur-md border ${theme.border} rounded-3xl p-5 shadow-xl flex flex-col justify-between glow-card transition-all duration-300 hover:scale-[1.01]`;
+                
+                let membersHtml = teamMembers.map((member, mIdx) => `
+                    <div class="flex items-center gap-2.5 py-1.5 px-3 rounded-xl bg-slate-900/40 border border-white/5 text-xs text-slate-200">
+                        <span class="w-5 h-5 rounded-full ${theme.badge} flex items-center justify-center text-[10px] font-bold shadow">${mIdx + 1}</span>
+                        <span class="font-medium truncate">${member}</span>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-white/10">
+                            <h3 class="font-bold text-sm ${theme.titleColor} flex items-center gap-2">
+                                <i class="fa-solid ${theme.icon}"></i> ${teamName}
+                            </h3>
+                            <span class="text-[11px] font-semibold bg-slate-900/60 px-2.5 py-1 rounded-full text-slate-300 border border-white/10">
+                                ${teamMembers.length} integrantes
+                            </span>
+                        </div>
+                        <div class="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
+                            ${membersHtml}
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2 border-t border-white/10 flex justify-between items-center text-[10px] text-slate-400">
+                        <span>Equipo #${idx + 1}</span>
+                        <span class="text-indigo-300 font-semibold">${gInfo.name}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function resetAssignments() {
+            const container = document.getElementById('teams-container');
+            const gInfo = groupsData[currentGroupKey];
+            container.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center p-12 bg-slate-900/40 border-2 border-dashed border-indigo-500/20 rounded-3xl text-center">
+                    <div class="w-20 h-20 bg-indigo-500/10 text-indigo-400 rounded-3xl flex items-center justify-center text-3xl mb-4 animate-float border border-indigo-500/20 shadow-inner">
+                        <i class="fa-solid fa-people-group"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-indigo-200">¡Listos para sortear en ${gInfo.name}!</h3>
+                    <p class="text-sm text-slate-400 max-w-md mt-1">Presiona <span class="text-indigo-300 font-semibold">"¡Generar Equipos!"</span> cuando estés listo.</p>
+                </div>
+            `;
+            document.getElementById('stat-teams-count').innerText = "0";
+            document.getElementById('stat-avg-size').innerText = "0";
+            document.getElementById('stat-status').innerText = "Pendiente de girar";
+            document.getElementById('stat-status').className = "text-xs font-bold text-amber-400 mt-0.5";
+            showToast("Sorteo reiniciado", "info");
+        }
+
+        function openStudentModal() {
+            document.getElementById('student-modal').classList.remove('hidden');
+            renderStudentsModalList();
+        }
+
+        function closeStudentModal() {
+            document.getElementById('student-modal').classList.add('hidden');
+            updateTotalCount();
+        }
+
+        function renderStudentsModalList() {
+            const container = document.getElementById('students-list-container');
+            container.innerHTML = '';
+            students.forEach((student, idx) => {
+                let div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-950/60 border border-slate-800 px-3 py-2 rounded-xl text-xs";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-slate-500 font-bold">${idx + 1}.</span>
+                        <span class="text-slate-200 font-medium">${student}</span>
+                    </div>
+                    <button onclick="removeStudent(${idx})" class="text-rose-400 hover:text-rose-300 p-1 transition" title="Eliminar alumno">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addStudent() {
+            const input = document.getElementById('new-student-input');
+            const name = input.value.trim().toUpperCase();
+            if (name) {
+                students.push(name);
+                input.value = '';
+                renderStudentsModalList();
+                updateTotalCount();
+                showToast("Alumno añadido con éxito", "success");
+            }
+        }
+
+        function removeStudent(index) {
+            students.splice(index, 1);
+            renderStudentsModalList();
+            updateTotalCount();
+            showToast("Alumno removido", "info");
+        }
+
+        function restoreDefaultStudents() {
+            students = [...originalStudents];
+            renderStudentsModalList();
+            updateTotalCount();
+            showToast("Lista original restaurada", "success");
+        }
+
+        function exportResult() {
+            const cards = document.querySelectorAll('#teams-container > div');
+            if (cards.length === 0 || document.getElementById('teams-container').querySelector('.animate-float')) {
+                showToast("Primero debes generar los equipos para exportar.", "error");
+                return;
+            }
+
+            const gInfo = groupsData[currentGroupKey];
+            let text = `📋 EQUIPOS GENERADOS - ${gInfo.name} (${gInfo.school})\n\n`;
+            cards.forEach((card, idx) => {
+                let title = card.querySelector('h3').innerText;
+                text += `=== ${title} ===\n`;
+                let members = card.querySelectorAll('.flex.items-center.gap-2.5');
+                members.forEach((m, mIdx) => {
+                    text += `  ${mIdx + 1}. ${m.querySelector('span:last-child').innerText}\n`;
+                });
+                text += "\n";
+            });
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("¡Equipos copiados al portapapeles!", "success");
+            } catch (err) {
+                showToast("No se pudo copiar automáticamente", "error");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('notification-toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+            if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            } else if (type === 'error') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-400"></i>';
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-sky-400"></i>';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
